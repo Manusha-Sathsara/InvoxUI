@@ -5,13 +5,8 @@ import {
   ChevronDown, Check, DollarSign,
 } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
-import type { AppUser } from '../App'
 import { PRODUCTS as INITIAL_PRODUCTS } from '../App'
-
-interface ProductsViewProps {
-  isDark: boolean
-  currentUser: AppUser
-}
+import { useApp } from '../context/AppContext'
 
 const UNIT_OPTIONS = ['hour', 'day', 'month', 'project', 'unit', 'seat', 'license']
 
@@ -137,7 +132,7 @@ function AddProductModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={`text-xs mb-1.5 block ${isDark ? 'text-slate-400' : 'text-slate-500'}`} style={{ fontWeight: 600 }}>
                 Price <span className="text-red-500">*</span>
@@ -257,7 +252,8 @@ function AddProductModal({
   )
 }
 
-export function ProductsView({ isDark, currentUser }: ProductsViewProps) {
+export function ProductsView() {
+  const { isDark, currentUser } = useApp()
   const [products, setProducts] = useState(INITIAL_PRODUCTS)
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)

@@ -6,13 +6,8 @@ import {
   UserPlus, ChevronDown,
 } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
-import type { AppUser } from '../App'
 import { CUSTOMERS as INITIAL_CUSTOMERS } from '../App'
-
-interface CustomersViewProps {
-  isDark: boolean
-  currentUser: AppUser
-}
+import { useApp } from '../context/AppContext'
 
 const COUNTRIES = ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Singapore', 'Japan']
 
@@ -221,7 +216,8 @@ function AddCustomerModal({
   )
 }
 
-export function CustomersView({ isDark, currentUser }: CustomersViewProps) {
+export function CustomersView() {
+  const { isDark, currentUser } = useApp()
   const [customers, setCustomers] = useState(INITIAL_CUSTOMERS)
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -295,7 +291,7 @@ export function CustomersView({ isDark, currentUser }: CustomersViewProps) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { label: 'Total Customers', value: String(customers.length), icon: Users, color: 'from-indigo-500 to-violet-600' },
             { label: 'Total Invoiced', value: `$${(totalRevenue / 1000).toFixed(0)}k`, icon: TrendingUp, color: 'from-emerald-500 to-teal-600' },

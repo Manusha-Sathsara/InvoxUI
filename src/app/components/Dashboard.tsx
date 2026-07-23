@@ -1,16 +1,10 @@
 import { motion } from 'motion/react'
+import { useNavigate } from 'react-router'
 import {
   DollarSign, AlertCircle, Users, FileText, TrendingUp, TrendingDown,
   ArrowRight, Clock, CheckCircle2, Send, UserPlus, FilePlus, AlertTriangle,
 } from 'lucide-react'
-import type { AppUser, ViewType } from '../App'
-
-interface DashboardProps {
-  isDark: boolean
-  currentUser: AppUser
-  onNavigate: (view: ViewType) => void
-  onCreateInvoice: () => void
-}
+import { useApp } from '../context/AppContext'
 
 const MONTHLY_DATA = [
   { month: 'Aug', revenue: 38200, expenses: 16400 },
@@ -179,7 +173,11 @@ function RevenueBarChart({ data, isDark }: { data: typeof MONTHLY_DATA; isDark: 
   )
 }
 
-export function Dashboard({ isDark, currentUser, onNavigate, onCreateInvoice }: DashboardProps) {
+export function Dashboard() {
+  const { isDark, currentUser, currentTenant } = useApp()
+  const navigate = useNavigate()
+  const onNavigate = (view: string) => navigate(`/${currentTenant.slug}/${view}`)
+  const onCreateInvoice = () => navigate(`/${currentTenant.slug}/invoices/new`)
   const glass = isDark
     ? 'bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] shadow-xl'
     : 'bg-white/70 backdrop-blur-xl border border-white shadow-xl shadow-black/5'
@@ -235,7 +233,7 @@ export function Dashboard({ isDark, currentUser, onNavigate, onCreateInvoice }: 
           transition={{ duration: 0.3, delay: 0.28 }}
           className={`${glass} rounded-2xl p-5 xl:col-span-2`}
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
             <div>
               <h2 className={`text-sm ${isDark ? 'text-slate-100' : 'text-slate-800'}`} style={{ fontWeight: 700 }}>
                 Revenue Overview
@@ -244,7 +242,7 @@ export function Dashboard({ isDark, currentUser, onNavigate, onCreateInvoice }: 
                 Last 6 months · revenue vs expenses
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-xs flex-shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-1.5 rounded-full bg-indigo-500" />
                 <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>Revenue</span>

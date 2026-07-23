@@ -1,67 +1,64 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router'
 import { Search, Bell, Sun, Moon, Plus, Menu, FileText, LayoutDashboard, Users, Package, Settings, X } from 'lucide-react'
-import type { ViewType, AppUser } from '../App'
+import { useApp } from '../context/AppContext'
+import type { ViewType } from '../App'
 
 interface TopBarProps {
-  isDark: boolean
-  onDarkToggle: () => void
   currentView: ViewType
-  currentUser: AppUser
   notificationCount: number
-  onCreateInvoice: () => void
   onMobileMenuToggle: () => void
 }
 
 const VIEW_LABELS: Record<ViewType, { label: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
-  dashboard: { label: 'Dashboard', icon: LayoutDashboard },
-  invoices: { label: 'Invoices', icon: FileText },
-  'invoice-editor': { label: 'Invoice Editor', icon: FileText },
-  customers: { label: 'Customers', icon: Users },
-  products: { label: 'Products', icon: Package },
-  settings: { label: 'Team & Settings', icon: Settings },
-  login: { label: 'Sign In', icon: LayoutDashboard },
-  register: { label: 'Register', icon: LayoutDashboard },
+  landing:         { label: 'Home',           icon: LayoutDashboard },
+  login:           { label: 'Sign In',         icon: LayoutDashboard },
+  register:        { label: 'Register',        icon: LayoutDashboard },
+  dashboard:       { label: 'Dashboard',       icon: LayoutDashboard },
+  invoices:        { label: 'Invoices',        icon: FileText        },
+  'invoice-editor':{ label: 'Invoice Editor',  icon: FileText        },
+  customers:       { label: 'Customers',       icon: Users           },
+  products:        { label: 'Products',        icon: Package         },
+  settings:        { label: 'Team & Settings', icon: Settings        },
 }
 
 const NOTIFICATIONS = [
-  { id: '1', title: 'Invoice #INV-2024-005 paid', desc: 'Figma Corp paid $8,800', time: '2m ago', type: 'success' },
-  { id: '2', title: 'Invoice overdue', desc: 'Linear Labs – #INV-2023-098', time: '1h ago', type: 'warning' },
-  { id: '3', title: 'New customer added', desc: 'Webflow Inc joined', time: '3h ago', type: 'info' },
+  { id: '1', title: 'Invoice #INV-2024-005 paid',  desc: 'Figma Corp paid $8,800',       time: '2m ago', type: 'success' },
+  { id: '2', title: 'Invoice overdue',              desc: 'Linear Labs – #INV-2023-098',  time: '1h ago', type: 'warning' },
+  { id: '3', title: 'New customer added',           desc: 'Webflow Inc joined',           time: '3h ago', type: 'info'    },
 ]
 
-export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notificationCount, onCreateInvoice, onMobileMenuToggle }: TopBarProps) {
+export function TopBar({ currentView, notificationCount, onMobileMenuToggle }: TopBarProps) {
+  const { isDark, toggleDark, currentUser, currentTenant } = useApp()
+  const navigate = useNavigate()
   const [searchFocused, setSearchFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
 
-  // Close notification panel when view changes
-  useEffect(() => {
-    setNotifOpen(false)
-  }, [currentView])
+  useEffect(() => { setNotifOpen(false) }, [currentView])
 
-  // Close on outside click
   useEffect(() => {
     function handle(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false)
-      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false)
     }
     document.addEventListener('mousedown', handle)
     return () => document.removeEventListener('mousedown', handle)
   }, [])
 
-  const viewConfig = VIEW_LABELS[currentView]
+  const viewConfig = VIEW_LABELS[currentView] ?? VIEW_LABELS.dashboard
   const ViewIcon = viewConfig.icon
   const canCreate = currentUser.role !== 'Viewer'
+
+  const handleCreateInvoice = () => navigate(`/${currentTenant.slug}/invoices/new`)
 
   const topBarBg = isDark
     ? 'bg-slate-950/60 backdrop-blur-xl border-b border-white/[0.06]'
     : 'bg-white/60 backdrop-blur-xl border-b border-black/[0.06]'
 
   return (
-    <div className={`flex items-center h-16 px-4 lg:px-6 gap-4 flex-shrink-0 ${topBarBg}`} style={{ position: 'relative', zIndex: 10 }}>
+    <div className={`flex items-center h-16 px-3 lg:px-6 gap-2 lg:gap-4 flex-shrink-0 min-w-0 ${topBarBg}`} style={{ position: 'relative', zIndex: 10 }}>
       {/* Mobile menu */}
       <button
         onClick={onMobileMenuToggle}
@@ -80,17 +77,11 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
 
       {/* Search */}
       <div className="flex-1 max-w-sm hidden md:block">
-        <div
-          className={`relative flex items-center rounded-xl border transition-all duration-200 ${
-            searchFocused
-              ? isDark
-                ? 'border-indigo-500/50 bg-white/[0.06] shadow-lg shadow-indigo-500/10'
-                : 'border-indigo-300 bg-white/80 shadow-lg shadow-indigo-500/10'
-              : isDark
-                ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.06]'
-                : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.05]'
-          }`}
-        >
+        <div className={`relative flex items-center rounded-xl border transition-all duration-200 ${
+          searchFocused
+            ? isDark ? 'border-indigo-500/50 bg-white/[0.06] shadow-lg shadow-indigo-500/10' : 'border-indigo-300 bg-white/80 shadow-lg shadow-indigo-500/10'
+            : isDark ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.06]' : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.05]'
+        }`}>
           <Search size={15} className={`absolute left-3 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
           <input
             type="text"
@@ -118,12 +109,12 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
-        {/* Create Invoice button */}
+        {/* Create Invoice */}
         {canCreate ? (
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            onClick={onCreateInvoice}
+            onClick={handleCreateInvoice}
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-white shadow-lg shadow-indigo-500/25 transition-all"
             style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', fontWeight: 600 }}
           >
@@ -152,11 +143,7 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setNotifOpen(!notifOpen)}
-            className={`relative p-2.5 rounded-xl border transition-all ${
-              isDark
-                ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.08] text-slate-300'
-                : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.06] text-slate-600'
-            }`}
+            className={`relative p-2.5 rounded-xl border transition-all ${isDark ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.08] text-slate-300' : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.06] text-slate-600'}`}
           >
             <Bell size={18} />
             {notificationCount > 0 && (
@@ -174,7 +161,7 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className={`absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl overflow-hidden`}
+                className="absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl overflow-hidden"
                 style={{ zIndex: 600 }}
               >
                 <div className={`${isDark ? 'bg-slate-900/98 backdrop-blur-xl border-white/[0.08]' : 'bg-white/98 backdrop-blur-xl border-black/[0.08]'} rounded-2xl border shadow-2xl`}>
@@ -182,10 +169,7 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
                     <span className={`text-sm ${isDark ? 'text-slate-200' : 'text-slate-800'}`} style={{ fontWeight: 700 }}>Notifications</span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500 text-white" style={{ fontWeight: 600 }}>{notificationCount}</span>
-                      <button
-                        onClick={() => setNotifOpen(false)}
-                        className={`p-1 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-slate-500' : 'hover:bg-black/5 text-slate-400'}`}
-                      >
+                      <button onClick={() => setNotifOpen(false)} className={`p-1 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-slate-500' : 'hover:bg-black/5 text-slate-400'}`}>
                         <X size={13} />
                       </button>
                     </div>
@@ -210,7 +194,7 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
                       </motion.button>
                     ))}
                   </div>
-                  <div className={`px-4 py-2.5 text-center`}>
+                  <div className="px-4 py-2.5 text-center">
                     <button className="text-xs text-indigo-500 hover:text-indigo-400 transition-colors" style={{ fontWeight: 600 }}>
                       Mark all as read
                     </button>
@@ -225,12 +209,8 @@ export function TopBar({ isDark, onDarkToggle, currentView, currentUser, notific
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onDarkToggle}
-          className={`p-2.5 rounded-xl border transition-all ${
-            isDark
-              ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.08] text-amber-400'
-              : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.06] text-slate-600'
-          }`}
+          onClick={toggleDark}
+          className={`p-2.5 rounded-xl border transition-all ${isDark ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.08] text-amber-400' : 'border-black/[0.07] bg-black/[0.03] hover:bg-black/[0.06] text-slate-600'}`}
         >
           <AnimatePresence mode="wait">
             {isDark ? (

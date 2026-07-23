@@ -1,20 +1,15 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate, useParams } from 'react-router'
 import {
   ArrowLeft, Plus, Trash2, Save, Send, FileDown,
   FileText, User, Package, ChevronDown,
   CheckCircle2, AlertTriangle,
 } from 'lucide-react'
 import { DatePicker } from './DatePicker'
-import type { AppUser, InvoiceStatus, LineItem } from '../App'
+import type { InvoiceStatus, LineItem } from '../App'
 import { INVOICES, CUSTOMERS, PRODUCTS } from '../App'
-
-interface InvoiceEditorProps {
-  isDark: boolean
-  invoiceId: string | null
-  currentUser: AppUser
-  onBack: () => void
-}
+import { useApp } from '../context/AppContext'
 
 const STATUS_COLORS: Record<InvoiceStatus, { text: string; bg: string; border: string; dot: string }> = {
   Draft: {
@@ -57,7 +52,12 @@ function addDays(date: string, days: number) {
   return d.toISOString().split('T')[0]
 }
 
-export function InvoiceEditor({ isDark, invoiceId, currentUser, onBack }: InvoiceEditorProps) {
+export function InvoiceEditor() {
+  const { isDark, currentUser, currentTenant } = useApp()
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const invoiceId = id ?? 'new'
+  const onBack = () => navigate(`/${currentTenant.slug}/invoices`)
   const isNew = invoiceId === 'new'
   const existingInv = isNew ? null : INVOICES.find(i => i.id === invoiceId) ?? null
   const canEdit = currentUser.role !== 'Viewer'
@@ -299,8 +299,11 @@ export function InvoiceEditor({ isDark, invoiceId, currentUser, onBack }: Invoic
               )}
             </div>
 
+            {/* Line items — scroll on mobile */}
+            <div className="overflow-x-auto -mx-1 px-1">
+
             {/* Table header */}
-            <div className={`grid gap-2 pb-2 mb-1 border-b text-xs ${isDark ? 'border-white/[0.06] text-slate-500' : 'border-black/[0.05] text-slate-400'}`}
+            <div className={`grid gap-2 pb-2 mb-1 border-b text-xs min-w-[520px] ${isDark ? 'border-white/[0.06] text-slate-500' : 'border-black/[0.05] text-slate-400'}`}
               style={{ gridTemplateColumns: '1fr 80px 100px 70px 90px 36px', fontWeight: 600 }}>
               <span>Description / Product</span>
               <span>Qty</span>
@@ -321,7 +324,7 @@ export function InvoiceEditor({ isDark, invoiceId, currentUser, onBack }: Invoic
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.18 }}
-                    className={`grid gap-2 py-2.5 border-b ${isDark ? 'border-white/[0.04]' : 'border-black/[0.04]'}`}
+                    className={`grid gap-2 py-2.5 border-b min-w-[520px] ${isDark ? 'border-white/[0.04]' : 'border-black/[0.04]'}`}
                     style={{ gridTemplateColumns: '1fr 80px 100px 70px 90px 36px', alignItems: 'center' }}
                   >
                     {/* Description with product picker */}
@@ -440,6 +443,7 @@ export function InvoiceEditor({ isDark, invoiceId, currentUser, onBack }: Invoic
                 )
               })}
             </AnimatePresence>
+            </div>{/* end overflow-x-auto */}
           </motion.div>
 
           {/* Notes */}

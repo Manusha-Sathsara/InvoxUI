@@ -4,12 +4,7 @@ import {
   Settings, Users, Bell, Shield, CreditCard, Globe,
   Building, Mail, Phone, Check, ChevronRight,
 } from 'lucide-react'
-import type { AppUser } from '../App'
-
-interface SettingsViewProps {
-  isDark: boolean
-  currentUser: AppUser
-}
+import { useApp } from '../context/AppContext'
 
 const TEAM = [
   { id: '1', name: 'Alex Morgan', email: 'alex@acme.com', role: 'Admin', initials: 'AM', color: '#6366f1' },
@@ -37,8 +32,8 @@ const NOTIF_ITEMS = [
 function NotifToggle({ label, desc, defaultOn, isDark }: { label: string; desc: string; defaultOn: boolean; isDark: boolean }) {
   const [on, setOn] = useState(defaultOn)
   return (
-    <div className={`flex items-center justify-between p-3.5 rounded-xl border ${isDark ? 'border-white/[0.05]' : 'border-black/[0.05]'}`}>
-      <div>
+    <div className={`flex items-center justify-between gap-4 p-3.5 rounded-xl border ${isDark ? 'border-white/[0.05]' : 'border-black/[0.05]'}`}>
+      <div className="min-w-0">
         <p className={`text-sm ${isDark ? 'text-slate-200' : 'text-slate-800'}`} style={{ fontWeight: 600 }}>{label}</p>
         <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{desc}</p>
       </div>
@@ -64,7 +59,8 @@ const ROLE_COLORS: Record<string, string> = {
   Viewer: 'text-slate-500 bg-slate-100 border-slate-200 dark:text-slate-400 dark:bg-slate-800/50 dark:border-slate-700/40',
 }
 
-export function SettingsView({ isDark, currentUser }: SettingsViewProps) {
+export function SettingsView() {
+  const { isDark, currentUser } = useApp()
   const [activeTab, setActiveTab] = useState('company')
   const [companyName, setCompanyName] = useState('Acme Corp')
   const [companyEmail, setCompanyEmail] = useState('billing@acme.com')
@@ -99,9 +95,9 @@ export function SettingsView({ isDark, currentUser }: SettingsViewProps) {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Sidebar tabs */}
+        {/* Tabs — horizontal scroll on mobile, vertical sidebar on lg+ */}
         <div className={`${glass} rounded-2xl p-3 lg:w-52 flex-shrink-0`}>
-          <nav className="space-y-0.5">
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
             {SETTING_TABS.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
@@ -109,7 +105,7 @@ export function SettingsView({ isDark, currentUser }: SettingsViewProps) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                  className={`relative flex-shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
                     isActive
                       ? isDark
                         ? 'text-indigo-300 bg-indigo-900/30 border border-indigo-700/30'

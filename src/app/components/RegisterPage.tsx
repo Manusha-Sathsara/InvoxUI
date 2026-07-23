@@ -1,15 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useNavigate } from 'react-router'
 import { Zap, Mail, Lock, Eye, EyeOff, User, Sun, Moon, ArrowRight, Building2 } from 'lucide-react'
+import { useApp } from '../context/AppContext'
 
-interface RegisterPageProps {
-  isDark: boolean
-  onDarkToggle: () => void
-  onRegister: () => void
-  onLogin: () => void
-}
+export function RegisterPage() {
+  const { isDark, toggleDark, login, currentTenant } = useApp()
+  const navigate = useNavigate()
 
-export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: RegisterPageProps) {
   const [name, setName] = useState('')
   const [company, setCompany] = useState('')
   const [email, setEmail] = useState('')
@@ -24,7 +22,10 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     setError('')
     setLoading(true)
-    setTimeout(() => { setLoading(false); onRegister() }, 900)
+    setTimeout(() => {
+      login()
+      navigate(`/${currentTenant.slug}/dashboard`, { replace: true })
+    }, 900)
   }
 
   const inputClass = `w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${
@@ -38,10 +39,9 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
     : 'bg-white/70 backdrop-blur-2xl border border-white/80 shadow-2xl shadow-black/10'
 
   return (
-    <div className="relative flex items-center justify-center w-full h-full z-10 overflow-y-auto py-8">
-      {/* Dark toggle */}
+    <div className="relative flex items-center justify-center min-h-screen py-8 z-10">
       <button
-        onClick={onDarkToggle}
+        onClick={toggleDark}
         className={`fixed top-6 right-6 p-2.5 rounded-xl border transition-all z-20 ${
           isDark
             ? 'border-white/[0.07] bg-white/[0.04] hover:bg-white/[0.08] text-amber-400'
@@ -57,7 +57,6 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={`w-full max-w-md mx-4 rounded-3xl p-8 ${glass}`}
       >
-        {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
             <Zap size={20} className="text-white" />
@@ -82,28 +81,14 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
               </label>
               <div className="relative">
                 <User size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-                <input
-                  type="text"
-                  placeholder="Alex Morgan"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className={`${inputClass} pl-10`}
-                />
+                <input type="text" placeholder="Alex Morgan" value={name} onChange={e => setName(e.target.value)} className={`${inputClass} pl-10`} />
               </div>
             </div>
             <div>
-              <label className={`text-xs mb-1.5 block ${isDark ? 'text-slate-400' : 'text-slate-600'}`} style={{ fontWeight: 600 }}>
-                Company
-              </label>
+              <label className={`text-xs mb-1.5 block ${isDark ? 'text-slate-400' : 'text-slate-600'}`} style={{ fontWeight: 600 }}>Company</label>
               <div className="relative">
                 <Building2 size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-                <input
-                  type="text"
-                  placeholder="Acme Corp"
-                  value={company}
-                  onChange={e => setCompany(e.target.value)}
-                  className={`${inputClass} pl-10`}
-                />
+                <input type="text" placeholder="Acme Corp" value={company} onChange={e => setCompany(e.target.value)} className={`${inputClass} pl-10`} />
               </div>
             </div>
           </div>
@@ -114,13 +99,7 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
             </label>
             <div className="relative">
               <Mail size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-              <input
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className={`${inputClass} pl-10`}
-              />
+              <input type="email" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} className={`${inputClass} pl-10`} />
             </div>
           </div>
 
@@ -130,42 +109,25 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
             </label>
             <div className="relative">
               <Lock size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-              <input
-                type={showPass ? 'text' : 'password'}
-                placeholder="Min. 6 characters"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className={`${inputClass} pl-10 pr-10`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass(!showPass)}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 p-0.5 transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'}`}
-              >
+              <input type={showPass ? 'text' : 'password'} placeholder="Min. 6 characters" value={password} onChange={e => setPassword(e.target.value)} className={`${inputClass} pl-10 pr-10`} />
+              <button type="button" onClick={() => setShowPass(!showPass)} className={`absolute right-3 top-1/2 -translate-y-1/2 p-0.5 transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'}`}>
                 {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
             {password && (
               <div className="mt-1.5 flex gap-1">
-                {[1,2,3,4].map(i => (
-                  <div
-                    key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      password.length >= i * 3
-                        ? i <= 1 ? 'bg-red-400' : i <= 2 ? 'bg-amber-400' : i <= 3 ? 'bg-yellow-400' : 'bg-emerald-400'
-                        : isDark ? 'bg-white/10' : 'bg-black/10'
-                    }`}
-                  />
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
+                    password.length >= i * 3
+                      ? i <= 1 ? 'bg-red-400' : i <= 2 ? 'bg-amber-400' : i <= 3 ? 'bg-yellow-400' : 'bg-emerald-400'
+                      : isDark ? 'bg-white/10' : 'bg-black/10'
+                  }`} />
                 ))}
               </div>
             )}
           </div>
 
-          {error && (
-            <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
 
           <motion.button
             type="submit"
@@ -176,11 +138,7 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
             style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', fontWeight: 700 }}
           >
             {loading ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white"
-              />
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white" />
             ) : (
               <>Create account <ArrowRight size={15} /></>
             )}
@@ -195,7 +153,7 @@ export function RegisterPage({ isDark, onDarkToggle, onRegister, onLogin }: Regi
 
         <div className={`mt-6 pt-6 border-t text-center text-sm ${isDark ? 'border-white/[0.06] text-slate-500' : 'border-black/[0.06] text-slate-400'}`}>
           Already have an account?{' '}
-          <button onClick={onLogin} className="text-indigo-500 hover:text-indigo-400 transition-colors" style={{ fontWeight: 600 }}>
+          <button onClick={() => navigate('/login')} className="text-indigo-500 hover:text-indigo-400 transition-colors" style={{ fontWeight: 600 }}>
             Sign in
           </button>
         </div>

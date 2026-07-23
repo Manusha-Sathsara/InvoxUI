@@ -1,20 +1,15 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router'
 import {
   Plus, Search, Eye, Edit3, Send, Trash2,
   FileText, MoreHorizontal, Download,
   CheckCircle2, AlertTriangle, X,
 } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
-import type { AppUser, InvoiceStatus, Invoice } from '../App'
+import type { InvoiceStatus, Invoice } from '../App'
 import { INVOICES } from '../App'
-
-interface InvoiceListProps {
-  isDark: boolean
-  currentUser: AppUser
-  onEdit: (id: string) => void
-  onCreate: () => void
-}
+import { useApp } from '../context/AppContext'
 
 const STATUS_DOT: Record<InvoiceStatus, string> = {
   Draft: 'bg-slate-400',
@@ -70,7 +65,11 @@ function StatusBadge({ status, isDark }: { status: InvoiceStatus; isDark: boolea
   )
 }
 
-export function InvoiceList({ isDark, currentUser, onEdit, onCreate }: InvoiceListProps) {
+export function InvoiceList() {
+  const { isDark, currentUser, currentTenant } = useApp()
+  const navigate = useNavigate()
+  const onEdit = (id: string) => navigate(`/${currentTenant.slug}/invoices/${id}`)
+  const onCreate = () => navigate(`/${currentTenant.slug}/invoices/new`)
   const [activeFilter, setActiveFilter] = useState<InvoiceStatus | 'All'>('All')
   const [search, setSearch] = useState('')
   const [openMenu, setOpenMenu] = useState<string | null>(null)
@@ -203,8 +202,70 @@ export function InvoiceList({ isDark, currentUser, onEdit, onCreate }: InvoiceLi
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile card list */}
+        <div className="md:hidden space-y-2">
+          <AnimatePresence>
+            {filtered.length === 0 && (
+              <div className="py-12 text-center">
+                <FileText size={32} className={`mx-auto mb-2 ${isDark ? 'text-slate-700' : 'text-slate-300'}`} />
+                <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>No invoices found</p>
+              </div>
+            )}
+            {filtered.map((inv) => {
+              const total = calcTotal(inv)
+              const isUpdating = updatingId === inv.id
+              return (
+                <motion.div
+                  key={inv.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: isUpdating ? 0.45 : 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-colors ${
+                    isDark ? 'border-white/[0.06] bg-white/[0.02]' : 'border-black/[0.05] bg-black/[0.01]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-indigo-900/40' : 'bg-indigo-50'}`}>
+                      <FileText size={13} className={isDark ? 'text-indigo-400' : 'text-indigo-500'} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-sm truncate ${isDark ? 'text-slate-200' : 'text-slate-800'}`} style={{ fontWeight: 600 }}>{inv.number}</p>
+                      <p className={`text-xs truncate ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{inv.customerName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <StatusBadge status={inv.status} isDark={isDark} />
+                    <span className={`text-sm ${isDark ? 'text-slate-200' : 'text-slate-800'}`} style={{ fontWeight: 700 }}>
+                      ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                    {canEdit && (inv.status === 'Sent' || inv.status === 'Overdue') && (
+                      <button
+                        onClick={() => markAsPaid(inv)}
+                        disabled={isUpdating}
+                        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}
+                        title="Mark as Paid"
+                      >
+                        <CheckCircle2 size={14} />
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={() => onEdit(inv.id)}
+                        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-white/[0.06] text-slate-400' : 'hover:bg-black/[0.05] text-slate-400'}`}
+                        title="Edit"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[640px]">
             <thead>
               <tr className={`text-xs border-b ${isDark ? 'border-white/[0.06] text-slate-500' : 'border-black/[0.05] text-slate-400'}`}
