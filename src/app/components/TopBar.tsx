@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router'
-import { Search, Bell, Sun, Moon, Plus, Menu, FileText, LayoutDashboard, Users, Package, Settings, X } from 'lucide-react'
+import { Search, Bell, Sun, Moon, Plus, Menu, FileText, LayoutDashboard, Users, Package, Settings, X, FlaskConical } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import type { ViewType } from '../App'
 
@@ -21,6 +21,7 @@ const VIEW_LABELS: Record<ViewType, { label: string; icon: React.ComponentType<{
   customers:       { label: 'Customers',       icon: Users           },
   products:        { label: 'Products',        icon: Package         },
   settings:        { label: 'Team & Settings', icon: Settings        },
+  'test-services': { label: 'Test Services',  icon: FlaskConical    },
 }
 
 const NOTIFICATIONS = [

@@ -5,8 +5,14 @@ import { Zap, Mail, Lock, Eye, EyeOff, User, Sun, Moon, ArrowRight, Building2 } 
 import { useApp } from '../context/AppContext'
 
 export function RegisterPage() {
-  const { isDark, toggleDark, login, currentTenant } = useApp()
+  const { isDark, toggleDark, login, isAuthenticated, currentTenant } = useApp()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(`/${currentTenant.slug}/dashboard`, { replace: true })
+    }
+  }, [isAuthenticated, currentTenant.slug, navigate])
 
   const [name, setName] = useState('')
   const [company, setCompany] = useState('')

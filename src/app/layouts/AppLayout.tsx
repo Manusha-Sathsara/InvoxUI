@@ -12,11 +12,12 @@ function viewFromPath(pathname: string): ViewType {
   const section = parts[1] || 'dashboard'
   if (section === 'invoices' && parts.length > 2) return 'invoice-editor'
   const map: Record<string, ViewType> = {
-    dashboard: 'dashboard',
-    invoices:  'invoices',
-    customers: 'customers',
-    products:  'products',
-    settings:  'settings',
+    dashboard:       'dashboard',
+    invoices:        'invoices',
+    customers:       'customers',
+    products:        'products',
+    settings:        'settings',
+    'test-services': 'test-services',
   }
   return (map[section] as ViewType) ?? 'dashboard'
 }

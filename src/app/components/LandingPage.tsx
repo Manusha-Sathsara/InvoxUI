@@ -65,8 +65,14 @@ const NAV_LINKS = [
 ]
 
 export function LandingPage() {
-  const { isDark, toggleDark } = useApp()
+  const { isDark, toggleDark, isAuthenticated, currentTenant } = useApp()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(`/${currentTenant.slug}/dashboard`, { replace: true })
+    }
+  }, [isAuthenticated, currentTenant.slug, navigate])
 
   const [navOpen,        setNavOpen]        = useState(false)
   const [scrolled,       setScrolled]       = useState(false)

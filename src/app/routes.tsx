@@ -10,6 +10,7 @@ import { InvoiceEditor } from './components/InvoiceEditor'
 import { CustomersView } from './components/CustomersView'
 import { ProductsView } from './components/ProductsView'
 import { SettingsView } from './components/SettingsView'
+import { TestServicesView } from './components/TestServicesView'
 
 function RootInner() {
   const { isDark } = useApp()
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
           { path: 'customers',      Component: CustomersView },
           { path: 'products',       Component: ProductsView  },
           { path: 'settings',       Component: SettingsView  },
+          { path: 'test-services',  Component: TestServicesView },
         ],
       },
       { path: '*', loader: () => redirect('/') },

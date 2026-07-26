@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 import {
   Zap, LayoutDashboard, FileText, Users, Package, Settings,
   ChevronDown, Check, Layers, Shield, BookOpen, Eye,
-  ChevronLeft, ChevronRight, LogOut,
+  ChevronLeft, ChevronRight, LogOut, FlaskConical,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { TENANTS, APP_USERS } from '../App'
@@ -19,11 +19,12 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: 'dashboard' as ViewType, label: 'Dashboard',      icon: LayoutDashboard },
-  { id: 'invoices'  as ViewType, label: 'Invoices',        icon: FileText        },
-  { id: 'customers' as ViewType, label: 'Customers',       icon: Users           },
-  { id: 'products'  as ViewType, label: 'Products',        icon: Package         },
-  { id: 'settings'  as ViewType, label: 'Team & Settings', icon: Settings        },
+  { id: 'dashboard'     as ViewType, label: 'Dashboard',      icon: LayoutDashboard },
+  { id: 'invoices'      as ViewType, label: 'Invoices',        icon: FileText        },
+  { id: 'customers'     as ViewType, label: 'Customers',       icon: Users           },
+  { id: 'products'      as ViewType, label: 'Products',        icon: Package         },
+  { id: 'settings'      as ViewType, label: 'Team & Settings', icon: Settings        },
+  { id: 'test-services' as ViewType, label: 'Test Services',  icon: FlaskConical    },
 ]
 
 const roleConfig = {

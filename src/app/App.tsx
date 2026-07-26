@@ -6,7 +6,7 @@ import { router } from './routes'
 export type ViewType =
   | 'landing' | 'login' | 'register'
   | 'dashboard' | 'invoices' | 'invoice-editor'
-  | 'customers' | 'products' | 'settings'
+  | 'customers' | 'products' | 'settings' | 'test-services'
 
 export type UserRole = 'Admin' | 'Accountant' | 'Viewer'
 
@@ -132,8 +132,17 @@ export const INVOICES: Invoice[] = [
   },
 ]
 
+import { AuthProvider } from '@asgardeo/auth-react'
+import { getAsgardeoConfig } from './config/asgardeoConfig'
+
 // ─── App entry ───────────────────────────────────────────────────────────────
 
 export default function App() {
-  return <RouterProvider router={router} />
+  const config = getAsgardeoConfig()
+  return (
+    <AuthProvider config={config}>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  )
 }
+

@@ -30,6 +30,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/api-gateway': {
+        target: 'https://localhost:8243',
+        changeOrigin: true,
+        secure: false, // Bypass self-signed SSL certificate check for local dev
+        rewrite: (p) => p.replace(/^\/api-gateway/, ''),
+      },
+    },
+  },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
